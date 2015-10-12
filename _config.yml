@@ -1,11 +1,31 @@
-# Site settings
 title: 拾陆
-email: jsonzhang@icloud.com
-description: keep changing
-baseurl: "" # the subpath of your site, e.g. /blog/
-url: "http://jsonzhang.com" # the base hostname & protocol for your site
-twitter_username: jsonzhang
-github_username:  jsonzhang
+description: Keep
+
+url: http://brianmaierjr.github.com/long-haul
+baseurl: ""
+paginate_path: "blog/page:num/"
+permalink: blog/:title/
+
+markdown: redcarpet
+highlighter: pygments
+paginate: 5
+
+navigation:
+ - title: Home
+   url: /index.html
+ - title: About
+   url: /about
+ - title: Contact
+   url: /contact
+
+social:
+   github: jsonzhang
+   twitter: jsonzhang
+   facebook: jsonzhang
+   email: jsonzhang@icloud.com
+
+google_analytics: "UA-58263416-1"
+
 
 # Build settings
 markdown: kramdown
