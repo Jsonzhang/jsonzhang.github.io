@@ -2,6 +2,7 @@
 layout: post
 title:  "chales调试进阶"
 date:   2015-10-15
+comments: true
 <!-- image: 2015-10-12-charles-debug.png -->
 ---
 
