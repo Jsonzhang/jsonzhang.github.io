@@ -175,14 +175,13 @@ HEADER STYLING
 ***************/
 
 .header {
-	background-color: seagreen;
-	background-image: url('../img/touring.jpg');
+	background-color: $primary-color;
+	// background-image: url('../img/banner_1.jpg');
 	background-size: cover;
 	background-position: center center;
 	color: white;
 	padding: 0;
 	height: 3em;
-
 	.container {
 		padding: 0;
 		@include container(100%);
