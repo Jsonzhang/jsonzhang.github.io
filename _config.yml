@@ -25,3 +25,6 @@ social:
    email: jsonzhang@icloud.com
 
 google_analytics: "UA-58263416-1"
+
+
+exclude: ["node_modules", "gulpfile.js", "package.json","assets/scss"]
