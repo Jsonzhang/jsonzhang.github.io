@@ -2,7 +2,7 @@
 layout: post
 title:  "Mac代理切换"
 date:   2015-10-13
-image: 2015-10-13-Mac-change-proxy.png
+<!-- image: 2015-10-13-Mac-change-proxy.png -->
 ---
 
 <p class="intro">
