@@ -11,8 +11,8 @@ highlighter: pygments
 paginate: 5
 
 navigation:
- - title: Home
-   url: /index.html
+ # - title: Home
+   # url: /index.html
  # - title: About
    # url: /about
 
