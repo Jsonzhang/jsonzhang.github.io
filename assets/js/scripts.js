@@ -6,7 +6,7 @@ $( document ).ready(function() {
 	window.Dropcap.layout(dropcaps, 2);
 
 	// Responsive-Nav
-	var nav = responsiveNav(".nav-collapse");
+	// var nav = responsiveNav(".nav-collapse");
 
 	// Round Reading Time
     $(".time").text(function (index, value) {
