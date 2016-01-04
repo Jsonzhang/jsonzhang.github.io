@@ -3,8 +3,8 @@ var browserSync = require('browser-sync');
 var sass        = require('gulp-sass');
 var prefix      = require('gulp-autoprefixer');
 var cp          = require('child_process');
-var compass = require('gulp-compass');
-
+var compass     = require('gulp-compass');
+var autoprefixer= require('gulp-autoprefixer');
 
 
 var messages = {
@@ -48,6 +48,7 @@ gulp.task('compass', function() {
       css: 'assets/css',
       sass: 'assets/scss'
     })).on('error', browserSync.notify)
+    .pipe(autoprefixer({ browsers: ["> 1%", "IE 7"] }))
     .pipe(gulp.dest('_site/assets/css'))
     .pipe(browserSync.reload({stream:true}));
 });
