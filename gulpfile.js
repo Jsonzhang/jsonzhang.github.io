@@ -50,6 +50,7 @@ gulp.task('compass', function() {
     })).on('error', browserSync.notify)
     .pipe(autoprefixer({ browsers: ["> 1%", "IE 7"] }))
     .pipe(gulp.dest('_site/assets/css'))
+    .pipe(gulp.dest('./assets/css'))
     .pipe(browserSync.reload({stream:true}));
 });
 
