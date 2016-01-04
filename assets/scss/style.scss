@@ -64,29 +64,49 @@ $on-laptop:        800px;
     }
 }
 
-.header{
-    display: block;
-    overflow: hidden;
-    .headerBg{
-        position: absolute;
-        left:0;
-        top:0;
-        width: 100%;
-        height: 100%;
-        img{
-            -webkit-transform: translate(0,-33.33%);
-           -moz-transform: translate(0,-33.33%);
-            -ms-transform: translate(0,-33.33%);
-             -o-transform: translate(0,-33.33%);
-                transform: translate(0,-33.33%);
-            width: 100%;
-            // height: 100%;
-        }
-    }
-}
+// .header{
+//     display: block;
+//     overflow: hidden;
+//     .headerBg{
+//         position: absolute;
+//         left:0;
+//         top:0;
+//         width: 100%;
+//         height: 100%;
+//         img{
+//             -webkit-transform: translate(0,-33.33%);
+//            -moz-transform: translate(0,-33.33%);
+//             -ms-transform: translate(0,-33.33%);
+//              -o-transform: translate(0,-33.33%);
+//                 transform: translate(0,-33.33%);
+//             width: 100%;
+//             // height: 100%;
+//         }
+//     }
+// }
 
 // Import media queries add more as you desire
 @media only screen and (min-width: 800px) { @import "breakpoints/800up";} 
-
+@media only screen and (max-width: 450px) { 
+    .header{
+        display: block;
+        .pageTitle{
+            display: block;
+            text-align: center;
+        }
+        .media-links{
+            text-align: center;
+            display: block;
+            .noList{
+                text-align: center;
+            }
+        }
+    }
+} 
+@media only screen and (max-width: 382px) { 
+    .media-links ul li.shortHide{
+        display: none;
+    }
+}
 // If IE support is needed you can add them here or create another stylesheet for specific IE fixes
 
