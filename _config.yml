@@ -8,8 +8,8 @@ permalink: blog/:title/
 google_analytics: "false"
 imgArray: ["1.jpg"]
 
-markdown: redcarpet
-highlighter: pygments
+markdown: kramdown
+highlighter: rouge
 paginate: 5
 
 gems: ["jekyll-paginate"]
