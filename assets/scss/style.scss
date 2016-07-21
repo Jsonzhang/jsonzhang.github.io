@@ -14,7 +14,7 @@
 
 // Our variables
 $base-font-family: Helvetica, Arial, sans-serif;
-$base-font-size:   16px;
+$base-font-size:   100px;
 $small-font-size:  $base-font-size * 0.875;
 $base-line-height: 1.5;
 
@@ -110,3 +110,7 @@ $on-laptop:        800px;
 }
 // If IE support is needed you can add them here or create another stylesheet for specific IE fixes
 
+
+#disqus_thread{
+    margin-top: 50px;
+}
