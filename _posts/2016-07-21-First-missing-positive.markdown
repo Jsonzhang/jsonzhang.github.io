@@ -13,6 +13,20 @@ Your algorithm should run in O(n) time and uses constant space.
 
 - - -
 
+---
+layout: post
+title:  "Mac代理切换"
+date:   2016-5-13
+comments: true
+---
+
+<p class="intro">
+The answer came from the subconscious immediately was "Order it and find the number in the ordered array". But it was discarded soon due to its time complexity which is not qualified with the requirement, your algorithm should run in O(n) time and uses constant space. Even quick sort algorithm is a O(nlgn) algorithm.
+</p>
+
+
+
+
 The answer came from the subconscious immediately was "Order it and find the number in the ordered array". But it was discarded soon due to its time complexity which is not qualified with the requirement, your algorithm should run in O(n) time and uses constant space. Even quick sort algorithm is a O(nlgn) algorithm.
 
 Without ordering it , there is another idea came to me soon. I can find the missing positive number when I order it, so I can find the target even before I finish ordering this array. Though I know that must not the best way but I still want to recorded it : 
