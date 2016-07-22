@@ -12,6 +12,12 @@ markdown: kramdown
 highlighter: rouge
 paginate: 5
 
+
+kramdown:
+  input: GFM
+  syntax_highlighter: rouge
+  formatter: codehilite
+
 gems: ["jekyll-paginate"]
 
 navigation:
