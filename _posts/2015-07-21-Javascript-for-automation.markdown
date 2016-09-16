@@ -10,27 +10,6 @@ comments: true
 </p>
 
 
-+  [简介](#intro)
-+  [访问应用程序](#applicationVisit)
-+  [语法实例](#grammarExample)
-+  [获取属性，设置属性](#setAndGet)
-+  [元素数组](#arrayData)
-+  [过滤数组](#filterArray)
-+  [调用命令](#allocateOrder)
-+  [创建对象](#createObj)
-+  [添加脚本](#addScript)
-+  [Strict 标记](#Strict)
-+  [Timeout, Considering, 和 Ignoring](##TCI)
-+  [ObjectSpecifier](#ObjectSpecifier)
-+  [路径](#path)
-+  [Progress](#prgress)
-+  [类库](#library)
-+  [Applets(小应用程序)](#applets)
-+  [UI 自动化](#UIAutomation)
-+  [Objective-C 桥接器](#ObjectiveCBridge)
-+  [Automation.getDisplayString()](#getDisplayString)
-
-[id]: intro
 ##简介
 
 Javascript 在 Mac 环境下执行可以引用以下这些全局变量来完成一些系统级别的任务：
