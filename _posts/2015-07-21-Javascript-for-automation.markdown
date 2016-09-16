@@ -30,7 +30,8 @@ comments: true
 +  [Objective-C 桥接器](#ObjectiveCBridge)
 +  [Automation.getDisplayString()](#getDisplayString)
 
-[id]: intro
+<span id=" intro"></span>
+
 ## 简介
 
 Javascript 在 Mac 环境下执行可以引用以下这些全局变量来完成一些系统级别的任务：
@@ -50,76 +51,80 @@ Javascript 在 Mac 环境下执行可以引用以下这些全局变量来完成�
 在以上提到的这些引用了OSA的环境中，当你获取了一个 `Appication` 对象的 JavaScript 属性时，无论这个属性对象指向的是其他 App，还是其他 App 窗口，或者是外部数据，这个对象都只是一个对象修饰符而不是一个真正意义的实体对象。`Application` 对象上的 Javascript 属性对象都只是对象指针，并不是对应实体的真实值，而只是一个指向而已。如果要从被引用的属性上更新对应的值，必须做一些额外的步骤，这些步骤会在 "获取属性和设置属性" 这一节中提到.
 
 
-[id]:applicationVisit
+<span id="applicationVisit"></span>
+
 ## 访问应用程序
 
 应用程序可以被下面这几种方式调用访问到：
 
-1. 通过名称
+1.通过名称
 
 ```javascript
     Application("Mail")
 ```
 
-2. 通过Bundle ID调用：
+2.通过Bundle ID调用：
 
 ```javascript
     Application("com.apple.mail")
 ```
 
-3. 通过路径调用：
+3.通过路径调用：
 
 ```javascript
     Application("/Applications/Mail.app")
 ```
 
-4. 通过进程 ID 来调用：
+4.通过进程 ID 来调用：
 
 ```javascript
     Application(763)
 ```
 
-5. 调用远程机器上的应用程序：
+5.调用远程机器上的应用程序：
     
 ```javascript
     Application("eppc://127.0.0.1/Mail")
 ```
 
-6. 调用运行当前脚本的 APP：
+6.调用运行当前脚本的 APP：
 
 ```javascript
     Application.currentApplication()
 ```
 
-[id]: grammarExample
+<span id=" grammarExample"></span>
+
 ## 语法实例
 
 以下是一些调用对象的语法示例：
 
-1. 获取属性：
+1.获取属性：
     
 ```javascript
     Mail.name
 ```
 
-2. 获取数组元素：
+2.获取数组元素：
     
 ```javascript
     Mail.outgoingMessages[0]
 ```
 
-3. 调用方法：
+3.调用方法：
     
 ```javascript
     Mail.open(...)
 ```
 
-4. 创建对象：
+4.创建对象：
     
 ```javascript
     Mail.OutgoingMessage(...)
 ```
-[id]:setAndGet
+
+<span id="setAndGet"></span>
+
 ## 获取属性和设置属性
 脚本对象的属性可以作为 JavaScript 属性被点语法调用。像我们前面提到的一样，返回的会是一个对象引用而不是一个真的对象。 如果要获取一个实体的值，可以通过`get`方法来获取，将`get`属性作为方法调用：
     
@@ -139,26 +144,27 @@ Javascript 在 Mac 环境下执行可以引用以下这些全局变量来完成�
     subjects = Mail.inbox.messages.subject()
 ```
     
-[id]: "arrayData"
+<span id="arrayData"></span>
+
 ## 元素数组
 
 可以通过调用指定的方法或者方括号的方式来访问数组的元素，返回的对象也是一个带有属性和值的引用对象，对于一个数组元素可以用以下方法来访问到它的值：
 
-1. 序数：
+1.序数：
 
 ```javascript
     window = Mail.windows.at(0)
     window = Mail.windows[0]
 ```
 
-2. 名称：
+2.名称：
 
 ```javascript
     window = Mail.windows.byName("New Message")
     window = Mail.windows["New Message"]
 ```
 
-3. ID：
+3.ID：
 
 ```javascript
     window = Mail.windows.byId(412)
@@ -166,72 +172,76 @@ Javascript 在 Mac 环境下执行可以引用以下这些全局变量来完成�
 
 **注意**: 用 ID 来读取数组中的元素并不是用方括号，而是使用圆括号。
 
-[id]: "filterArray"
+<span id="filterArray"></span>
+
 ### 过滤数组
 
 要从一个数组中过滤出一些特定的元素，应该用数组的 `whose` 方法。 语法如下：
     
+```javascript
     someElementArray.whose({...})
+```
+
 传入一个对象作为参数，这个对象将作为数组筛选的标准，比如：
 
-1. 准确匹配某一个值：
+1.准确匹配某一个值：
     
         
 ```json
     { "name": "JavaScript for Automation" }
-    { "name": { _equals: "JavaScript for Automation" } }
+    { "name": { "_equals": "JavaScript for Automation" } }
     { "name": { "=": "JavaScript for Automation" } }
 ```
 
-2. 匹配包含某一个值的元素：
+2.匹配包含某一个值的元素：
 
 ```json
-    { "name": { _contains: "script for Auto" } }
+    { "name": { "_contains": "script for Auto" } }
 ```
 
-3. 匹配以某一个值开头的元素：
+3.匹配以某一个值开头的元素：
 
 ```json
     { "name": { "_beginsWith": "JavaScript" } }
 ```
 
-4. 匹配以某一个值结尾的元素：
+4.匹配以某一个值结尾的元素：
 
 ```json
     { "name": { "_endsWith": "Automation" } }
 ```
 
-5. 大于某个值：
+5.大于某个值：
 
 ```json
     { "size": { "_greaterThan": 20 } }
     { "size": { ">": 20 } }
 ```
 
-6. 大于或等于某个值：
+6.大于或等于某个值：
 
 ```json
     { "size": { "_greaterThanEquals": 20 } }
     { "size": { ">=": 20 } }
 ```
 
-7. 小于某个值：
+7.小于某个值：
 
 ```json
     { "size": { "_lessThan": 20 } }
     { "size": { "<": 20 } }
 ```
 
-8. 小于等于某个值：
+8.小于等于某个值：
     
 ```json
     { "size": { "_lessThanEquals": 20 } }
     { "size": { "<=": 20 } }
 ```
 
-9. 子元素的值匹配：
+9.子元素的值匹配：
 
-```json
+```javascript
     { "_match": [ ObjectSpecifier.tabs[0].name, "Apple" ] }
 ```
 
@@ -240,7 +250,7 @@ Javascript 在 Mac 环境下执行可以引用以下这些全局变量来完成�
 
 可以用自由组合这些筛选条件，与或非三种逻辑都支持。
 
-1. 与逻辑：
+1.与逻辑：
 
 ```json
     { "_and": [
@@ -253,7 +263,7 @@ Javascript 在 Mac 环境下执行可以引用以下这些全局变量来完成�
 
 再次注意:  _and 数组需要至少两个元素。
 
-2. 或逻辑：
+2.或逻辑：
 
 ```json
     { "_or": [
@@ -264,7 +274,7 @@ Javascript 在 Mac 环境下执行可以引用以下这些全局变量来完成�
 
 注意: _or 数组至少要有两个元素。
 
-3. 非逻辑：
+3.非逻辑：
 
 ```json
     { "_not": [
@@ -288,24 +298,25 @@ Javascript 在 Mac 环境下执行可以引用以下这些全局变量来完成�
         ]
     })
 ```
-[id]:allocateOrder
+<span id="allocateOrder"></span>
+
 ## 调用命令
 
 命令可以像函数一样被调用。一些命令可以直接传入参数，一些命令则可以支持命名参数（命名参数其实就是一个键值对的对象）。如果命令可以直接传入参数，你可以传入第二个参数作为命名参数。而如果命令不支持直接传入参数，则命名参数只能作为唯一一个参数被传入。如果命令传入的参数是可选的，你可以不传入任何东西或者传入一个null作为第一个参数，再传入一个命名参数作为第二个参数。
 
-1. 无参数的命令：
+1.无参数的命令：
     
 ```javascript
     message.open()
 ```
 
-2. 传入直接参数的命令：
+2.传入直接参数的命令：
 
 ```javascript
     Mail.open(message)
 ```
 
-3. 传入命名参数的命令：
+3.传入命名参数的命令：
 
 ```javascript
     response = message.reply({
@@ -314,7 +325,7 @@ Javascript 在 Mac 环境下执行可以引用以下这些全局变量来完成�
     })
 ```
 
-4. 同时传入直接参数和命名参数的命令：
+4.同时传入直接参数和命名参数的命令：
 
 ```javascript
     Safari.doJavaScript("alert("Hello world")", {
@@ -322,17 +333,18 @@ Javascript 在 Mac 环境下执行可以引用以下这些全局变量来完成�
     })
 ```
 
-[id]:createObj
+<span id="createObj"></span>
+
 ## 创建对象
 你可以通过调用类的构造函数来创建一个对象，也可以选择传入键值对形式的对象来作为参数构造新的对象，同时传入第二个参数来作为新对象创建时所需要的数据。一旦创建完对象你就可以使用对象的 `make` 方法或者将数据数组压入对象，这样对象才会真正在 `Application` 中存在， 在调用 `make` 方法或者把数组压入应用程序之前该对象并不会在应用中存在。
 
-1. 创建一个新对象：
+1.创建一个新对象：
     
 ```javascript
     message = Mail.OutgoingMessage().make()
 ```
 
-2. 创建一个有属性的新对象：
+2.创建一个有属性的新对象：
 
 ```javascript
     message = Mail.OutgoingMessage({
@@ -342,7 +354,7 @@ Javascript 在 Mac 环境下执行可以引用以下这些全局变量来完成�
     Mail.outgoingMessages.push(message)
 ```
 
-3. 创建一个有数据的新对象：
+3.创建一个有数据的新对象：
 
 ```javascript
     para = TextEdit.Paragraph({}, "Some text")
@@ -358,7 +370,8 @@ Javascript 在 Mac 环境下执行可以引用以下这些全局变量来完成�
 
 **注意**: 类的构建函数必须首字母大写。
 
-[id]:addScript
+<span id="addScript"></span>
+
 ## 添加脚本
 
 添加脚本能够增强拓展应用的功能，OS 系统有一系列的可用的标准脚本，提供了像阅读文本和用户对话框这样的功能。应用必须将`includeStandardAdditions` 标记设置为 `true` 才能使用这些功能。
@@ -374,24 +387,25 @@ Javascript 在 Mac 环境下执行可以引用以下这些全局变量来完成�
     })
 ```
 
-[id]:strict
+<span id="strict"></span>
+
 ## Strict 标记
 
 你可以用`strictPropertyScope`,`strictCommandScope`和`strictParameterType`控制自动化程序对Javascript的严谨程度的要求：
 
-1. 用于寻找属性所属的对象：
+1.用于寻找属性所属的对象：
 
 ```javascript
     app.strictPropertyScope = true
 ```
 
-    如果`foo`类有一个`bar`属性，`Baz`类则没有，如果有实例`app`继承自两个类，当`strictPropertyScope`为`false`的时候，如果在实例中找不到对应的属性会自己往父类搜寻是否有相应的属性。
+如果`foo`类有一个`bar`属性，`Baz`类则没有，如果有实例`app`继承自两个类，当`strictPropertyScope`为`false`的时候，如果在实例中找不到对应的属性会自己往父类搜寻是否有相应的属性。
 
 ```javascript
     app.baz[0].bar()
 ```
     
-2. 寻找对象返回值：
+2.寻找对象返回值：
 
 ```javascript
     app.strictCommandScope = true
@@ -403,7 +417,7 @@ Javascript 在 Mac 环境下执行可以引用以下这些全局变量来完成�
     app.bar[0].foo()
 ```
 
-3. 检查命令中传入的参数的类型：
+3.检查命令中传入的参数的类型：
     
 ```javascript
     app.strictParameterType = true
@@ -413,7 +427,8 @@ Javascript 在 Mac 环境下执行可以引用以下这些全局变量来完成�
 
 `strictPropertyScope` 和 `strictCommandScope` 的默认值为 `false` ，而 `strictParameterType` 的默认值为 `true`。
 
-[id]:TCL
+<span id="TCL"></span>
+
 ## Timeout, Considering, 和 Ignoring
 
 你可以在获取和设置属性的时候传入一个事件指向器，在对象上调用命令或者在应用中创建新对象的时候传入一个事件修饰符。这个事件修饰符应该作为调用函数的最后一个参数传入。比如:
@@ -452,20 +467,20 @@ Javascript 在 Mac 环境下执行可以引用以下这些全局变量来完成�
 `ObjectSpecifier`对象可以用于下面这些场景:
 
 
-1. 检查一个对象是否对象指引：
+1.检查一个对象是否对象指引：
 
 ```javascript
         Mail.inbox.messages[0] instanceof ObjectSpecifier == true
 ```
 
-2. 获取一个对象指引的类：
+2.获取一个对象指引的类：
 
 ```javascript
     Mail = Application("Mail")
     ObjectSpecifier.classOf(Mail.inbox)
 ```
 
-3. 用`whose`建立一个随机的对象指引链：
+3.用`whose`建立一个随机的对象指引链：
 
 ```javascript
     firstTabsName = ObjectSpecifier.tabs[0].name
@@ -475,8 +490,9 @@ Javascript 在 Mac 环境下执行可以引用以下这些全局变量来完成�
 ```
 
 
-[id]:path
-## Paths
+<span id="path"></span>
+
+## 路径
 当你需要在 TextEdit 中操作文档时你会需要的可能不仅仅是一个路径，而是一整个`Path`对象，这时你需要用`Path`构造函数来将路径实例化。
 
 ```javascript
@@ -487,7 +503,8 @@ Javascript 在 Mac 环境下执行可以引用以下这些全局变量来完成�
 
 注意: 调用 toString 方法就可以获取到 Path 对象的对应的路径字符串。
 
-[id]:progress
+<span id="progress"></span>
+
 ## Progress
 可以通过操作脚本的 Progress 对象来操作脚本运行过程中呈现的 UI 。 如下：
 设置进度总数：
@@ -517,7 +534,8 @@ Javascript 在 Mac 环境下执行可以引用以下这些全局变量来完成�
 
 **注意**：设置 progress 对象的补充描述意味着进度的总量和已完成的进度都会被显示出来。
 
-[id]:libraby
+<span id="libraby"></span>
+
 ## 类库
 
 你可以使用储存在 ~/Library/Script Libraries/ 这个脚本库的脚本来更方便快捷达成目的，比如你可以调用 “toolbox.scpt" 这个库文件:
@@ -539,7 +557,8 @@ Javascript 在 Mac 环境下执行可以引用以下这些全局变量来完成�
 
 **注意**: 代码库里任何暴露在函数之外的代码都会在调用的时候立刻被执行。
 
-[id]:applets
+<span id="applets"></span>
+
 ## Applets(小应用程序)
 
 你可以通过在脚本编辑器写出脚本并保存为应用程序，这样你就相当于创造了一个独立的，可双击运行的应用程序。小应用程序内置了以下这些处理方法：
@@ -586,7 +605,8 @@ Javascript 在 Mac 环境下执行可以引用以下这些全局变量来完成�
 
 注意: 唯一让小应用程序不退出的方法是在`quit`函数中返回`false`值。没有定义`quit`函数或者返回其他任何不是`false`的值都会让小程序正常退出。
 
-[id]:UIAutomation
+<span id="UIAutomation"></span>
+
 ## UI Automation
 
 你可以使用系统应用程序来编写应用的接口脚本。在脚本编辑器中的脚本字典查看系统事件(更具体地说是对应的具体进程的Suite)来看看具体是如何调用应用的事件。
@@ -605,7 +625,8 @@ Javascript 在 Mac 环境下执行可以引用以下这些全局变量来完成�
     Notes.windows[0].splitterGroups[0].groups[1].groups[0].buttons[0].click()
 ```
 
-[id]:ObjectiveCBridge
+<span id="ObjectiveCBridge"></span>
+
 ## Objective-C Bridge
 
 系统层级运行的Javascript有一个内建的Objective-C桥接器，通过这个桥接器可以提供一些比较强大的功能，比如访问文件系统和创建 Cocoa 应用程序。
@@ -650,8 +671,6 @@ Javascript 在 Mac 环境下执行可以引用以下这些全局变量来完成�
 ```
 
 如果一个 ObjC 方法需要传参调用，你可以根据`JSExport`约定的命名的Javascript方法(函数类型的属性值)来调用它；命名规范就是冒号后的字母必须大写，然后移除掉所有的冒号；比如，以下代码将Javascript `string` 类型转换为 `NSString`类型并写入到一个文件里：
-If the ObjC method does take arguments, then you invoke it by calling the JavaScript method (function-typed property) named according to the  convention; the letter following each ":" is capitalized, and then the ":"s are removed. For instance, this instantiates an  from a JavaScript string and writes it to a file:
-
 
 ```javascript
     str = $.NSString.alloc.initWithUTF8String("foo")
@@ -873,21 +892,21 @@ Javascript 可以注册实现 Objective-C 对象的子类：
 
 ```javascript
     ObjC.registerSubclass({
-        name: "MyClass",
-        properties: {
+        "name": "MyClass",
+        "properties": {
             foo: "id"
         },
-        methods: {
-            init: function () {
+        "methods": {
+            "init": function () {
                 var _this = ObjC.super(this).init;
                 if (_this != undefined) {
                 _this.foo = "bar"
                 }
                 return _this
             },
-            baz: {
-                types: ["void", []],
-                implementation: function () {
+            "baz": {
+                "types": ["void", []],
+                "implementation": function () {
                     this.foo = "quux"
                 }
             }
@@ -897,7 +916,8 @@ Javascript 可以注册实现 Objective-C 对象的子类：
 
 注意: **千万不要**重写 init(初始化) 方法中 this 变量或者其他属性值。 使用一个和已有变量不重复的变量名（如上面使用的`_this`）, 然后使用这个变量去初始化并返回属性 。在所有其他方法中都会使用到一个标准的`this`变量，在 JavaScript 中就更不应该去重新定义`this`这个变量 . Objective-C 类可以根据不同的调用从初始构造方法中返回一个不同的对象。 
 
-[id]:getDisplayString
+<span id="getDisplayString"></span>
+
 # Automation.getDisplayString()
 `Automation` 对象下的 getDisplayString 方法允许你传入一个对象，输出该对象的源文或者转化为可读的字符串。
 
