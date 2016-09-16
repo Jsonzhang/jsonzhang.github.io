@@ -10,22 +10,22 @@ comments: true
 我平日里用Macbook 工作，每天离开公司后把电脑带回家，会使用goagentX的Shadowsocks 来自动翻墙，因为公司是自动翻墙，这样就有频繁切换代理的需求，然后就走上了代理切换的不归路。
 </p>
 
-##1.0 石器时代
+## 1.0 石器时代
 
 最开始的时候，我是这么做的。
 把公司的PAC代理文件就是 http://xxx/proxy.pac 复制到备忘录，然后每次来到公司，连上公司 wifi 进行切换的时候点开 system setting - network - advance - auto proxy 然后填入。
 (请不要笑，事情总是要一步一步发展的。)
 
-##2.0 铁器时代
+## 2.0 铁器时代
 
 后来，我意识到上面的做法太低效，所以引入(@zenhuang)[https://github.com/hzlzh]的办法 : 使用网络位置切换来切换代理。从此以后就过上了利用位置来切换代理的生活。
 
-##3.0 工业时代
+## 3.0 工业时代
 
 上面那个方法引发出了一个新的问题，使用 GoagentX 的自动PAC模式代理的时候会导致覆盖掉所有的auto pac设置，所以即使你的 location 切换回 office ， 也没有办法把公司的代理切回来(这里或许有其他的代理软件可以解决这个问题，但总体来说比较麻烦)。
 所以引发出一个新的解决问题的思路，使用 Alfred 2 的 workflow来解决这个问题。
 
-###3.1 编写一个 workflow 来解决这个问题
+### 3.1 编写一个 workflow 来解决这个问题
 
 在 alfred 2 的 workflow 中新建一个 blank workflow 。 然后我们使用 keyword 来触发 workflow 的执行，这里我把 keyword 分别设置为 office 和 home。
 
@@ -44,12 +44,12 @@ comments: true
 引入workflow之后每天只需要一键即可切换代理，方便快捷，已经非常地方便。
 虽然痛点已经非常小，小到可以接受的地步，毕竟每天只需要按几个键就可以切换。但，仍然有不足的地方，如果工作频繁要在 staff-wifi 和 office-wifi 下切换，有时候忘记切代理，还是觉得有小小的不便。
 
-###3.2 后工业时代
+### 3.2 后工业时代
 
 由于 Alfred 2 不支持pac代理或者是端口，所以在 office-wifi 下如果我们要使用 Alfred 的其他功能需要把
 
 
-##4.0 信息时代
+## 4.0 信息时代
 
 其实从3.0~4.0只是非常小的一步，但却可以实现一键到无键的效果。实现无键的基本思路是依靠不同的网络作为判断的依据来切换代理配置。
 我们借助一个工具叫做 controlPlane(http://www.controlplaneapp.com/) 。
