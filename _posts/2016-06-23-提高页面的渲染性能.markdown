@@ -1,0 +1,535 @@
+---
+layout: post
+title:  "提高页面的渲染性能"
+date:   2016-06-23
+comments: true
+---
+
+# 关于渲染性能
+
+TL;DR
+
+## 为什么聊这个话题
+
+几天前，开始陆续收到用户反馈，有的页面无端卡死，就像下面这样：
+
+作为一名熟练的调试工程师，出了问题肯定马上开始调试，用起了达尔文的控制变量法找问题的出处。由于这是一个问卷，我第一反应就是某种题型导致了内存溢出，虽然在前端里内存溢出是比较少见的（V8自动回收内存）。
+
+在UR里加入了不同类型的上百道题目后发现找不出问题起源，并没有引发到原本必现的crash。
+
+## 当我们在谈论性能时，我们在谈论什么？
+### 网络性能
+
+减少文件体积。好吧，我承认这是一个被讲烂的话题，早在2008年雅虎就推出了[十四条性能军规](http://stevesouders.com/hpws/rules.php)，自此之后这些规则几乎成了改善页面性能的重中之重，虽然有一些随着时代发展废弃了或者不适用了，但这十四条规则无疑开启了广大前端工程师对页面性能的关注。
+
+但粗略看一遍十四条性能，你会发现性能提升的集中点在于“减少体积”，"减轻网络负荷"这两方面着手，简而言之就是能让你更快地看到你的网站，但随着现在网络硬件提升带宽增加，设计师要求越来越高的情况下，网络性能好已经不能代表整个网站的使用体验好。
+
+换言之，快速加载下来的页面在使用过程中仍然会卡顿，不流畅，所以让我们坐下来聊聊性能里面另外一面 --- 渲染性能。
+
+### 渲染性能
+
+#### 哪些点会影响到渲染性能？
+
+##### 影响 `layout` 的属性
+
+
+当你改变页面上某个元素的时候，浏览器需要做一次重新布局的操作，这次操作会包括计算受操作影响所有元素的几何数据（比如每个元素的位置和尺寸）。因此如果你改变一个元素，他的兄弟或者父子元素会有可能需要被重新绘制一次。 如果你修改了 `html` 这个元素的 `width` 属性，那么整个页面都会被重新绘制一次。
+
+由于元素相互覆盖，相互影响，稍有不慎的操作就有可能导致一次自上而下的布局计算。所以我们在进行元素操作的时候要一再小心尽量避免修改这些重新布局的属性。
+
+
+| 宽高 | 边距 | 位置 | 表现 | 边框 | 定位 | 字体 |
+| --- | --- | --- | --- |  --- | --- | --- |
+| width |  padding | position | display  | border |text-align | font-size |
+| height | margin | top | float | border-width | overflow-y | font-weight |
+
+
+
+
+
+##### 影响 `repaint` 的属性
+
+
+| 背景 | 边框 | 其他 |
+| --- | --- | --- |
+| background | border-style | color |
+| background-image | border-radius | visibility |
+| background-repeat | outline | text-decoration |
+| background-position | outline-style | box-shadow |
+| background-size | outline-color |
+| | outline-width |
+
+有些属性的修改不会触发重新布局，但却会触发 `repaint`(重新绘制)，现代浏览器中主要的绘制工作主要用光栅化软件来完成。 所以重新绘制的元素是否会很大程度影响你的性能，是由这个元素和绘制层级的关系来决定的，如果这个元素盖住的元素都被重新绘制，那代价自然就相当地大。
+
+如果你在动画里面使用了上述某些属性，导致重绘，这个元素所属的图层会被重新上传到 GPU 。 在移动设备上这是一个很昂贵耗资源的操作，因为移动设备的CPU明显不如你的电脑，这意味着绘制的工作会需要更长的时间； 而上传给 CPU 和 GPU 的带宽并非没有限制，所以重新绘制的纹理上传就自然需要更长的时间。
+
+
+
+
+
+##### 插入一点小实例
+
+以下为 `margin` 变化时页面的执行数据：
+
+![](media/14700408894152.jpg)
+
+
+我们可以看到页面在每一次动画执行的时候经历了 - 
+ 
+`recalculate style` --- 计算样式
+`layout` --- 重新布局
+`update layer tree` --- 更新layer树
+`Paint` --- 绘制
+`composite layers` --- 组合层
+
+
+
+以下是一个 `color` 改变的动画：
+
+![](media/14700395692709.jpg)
+
+可以看到这个流程相对于上述比较简单了一些，没有调用 `layout`
+
+`recalculate style` --- 计算样式
+`update layer tree` --- 更新layer树
+`Paint` --- 绘制
+`composite layers` --- 组合层
+
+
+以下为 `transform` 变化时页面的执行数据：
+![](media/14700319383770.jpg)
+
+
+我们可以看到主线程的工作已经交给 GPU 来优化，而主线程几乎不占工作。
+
+
+##### 最佳实践
+但有一个CSS属性你可能认为会触发重绘，但实际它并不会，这个属性就是 `opacity` 。 修改这个属性的所有工作都会被 GPU 来承担， 这些工作仅仅包括了在重新组合的时候调整这个元素纹理的 `alpha` 值，所以这耗费资源相比较其他元素来说非常少。
+
+但要注意的是如果你想要耗费尽量少的资源，这个会改变透明度的元素还是应该自己呆在一个图层。
+
+在 Blink 和 Webkit 浏览器里，任何元素只要有了关于 `opacity` 的动画，无论是通过 `transition` 还是 `animation` 来实现的， 都被默认被单独视为一个新图层。 但很多开发者也用 `translateZ(0)` 或者 `translate3d(0,0,0)` 来手动强制创建一个图层，当然这样也无可厚非。 事先强制创建一个单独的图层能够确保图层在绘制的时候能够单独重绘而不会影响其他元素，更重要的是，创建和绘制一个图层是一个耗时的操作，如果这个操作在动画开始执行再做，可能会因为CPU性能不够而延迟你的动画开始时间，所以事先创建就能避免你的动画看起来被加了一个奇怪的延迟（我相信经常做H5活动页面的同学会熟悉这个场景，手动微笑）, 因为抗锯齿变化的原因也不会有突变的出现。
+
+提升图层这个操作要非常谨慎，太多图层会耗费巨量的资源，结果就是你什么都不做都会非常卡。
+
+在 Chrome 里 ， 一个没有根节点，不透明的 图层都会使用 灰阶抗锯齿（灰阶反走样）的方式渲染，而不是用亚像素抗锯齿， 这个变化非常容易就能被察觉，特别是在抗锯齿方法突然改变的那一瞬间。 所以你要提升一个元素的图层，不要等到动画开始你再提升它，从一开始就做好计划，初始化的时候做一个提升。
+
+综上所述，做动画，性能最好的就是提升了图层的 `opacity` 和  `transform` ，单独层，不会影响其他任何东西，纯GPU绘制。
+
+
+##### 不要使用setTimeout/setInterval，使用 requestAnimationFrame 
+
+1 . raf能减少无意义的循环，
+
+![](media/14694392498843.jpg)
+
+
+##### DOM元素的插入方式
+
+```javascript
+
+// bad
+
+$("<li></li>").append(targetEl);
+$(targetEl).find('li').css('box-shadow','1px 3px 3px #000');
+$("<li></li>").append(targetEl);
+
+
+// better
+
+let temEl = $("<div><li></li></div>");
+
+tempEl.css('box-shadow', '1px 3px 3px #000');
+tempEl.append("<li></li>");
+
+$(targetEl).append(tempEl);
+
+```
+
+
+##### 检查repaint层是否合理
+
+
+![](media/14693400037481.jpg)
+
+![](media/14693401941493.jpg)
+>
+Javascript : 通常意义上来说Javascript用于可见的更改，无论是 jQuery 的 animation 函数， 排列一个数组集合，或者是在页面上增加一个DOM。 尽管可见的变化不一定是由 Javascript 触发，比如 CSS Animation, Transition 和 web animation API 都被广泛应用于页面变化。
+样式计算 : 这个过程会基于选择器来计算CSS规则应该应用在哪些元素上，比如 `.headline` 或者 `.nav > .nav__item`. 一旦一个规则被声明之后，就会马上被应用每个对应的元素，然后开始进行计算。 
+
+
+
+##### 检查绘制区域（animation合理性）
+```CSS
+// work
+
+.moving-element {
+    will-change : transform;
+}
+
+.moving-element {
+    transform : translateZ(0);
+}
+
+// not work
+
+.moving-element {
+    opacity: 0.4;
+}
+
+.moving-element {
+    position: absolute;
+    left: 10px;
+    top: 20px;
+}
+```
+
+
+##### 慎用fixed
+大规模的fixed区域
+
+fixed demo
+
+```CSS
+html { 
+  background: url(images/bg.jpg) no-repeat center center fixed; 
+  -webkit-background-size: cover;
+  -moz-background-size: cover;
+  -o-background-size: cover;
+  background-size: cover;
+}
+```
+
+解决方案： `-webkit-transform: translate3d(0,0,0);`
+
+
+
+
+
+
+###### 使用Classlist进行优化
+
+你是不是经常把一个状态存储在元素的class上 ？ 比如 `open` , `close` , `animated` , `faded` , `hide` 这些状态型的类，当这些元素被改变的时候，浏览器就会要重新做一次计算和布局。所以请千万小心这种无意触发的重新布局；可能这不是动画，但代价却比做一个动画更加昂贵！
+
+所以classname变化了，就一定会出现一次rendering计算，如果一定需要这么做，那可以使用 classlist 的方法。
+
+```javascript
+
+// good
+
+ele.addClass("abc");
+
+// bad
+
+ele.classname = "normalClassName abc";
+
+
+```
+
+
+
+
+
+
+
+##### `animation` 和 `transition` 的区别
+
+
+
+
+
+
+#### 动画性能，初次加载性能
+
+
+
+##### 浏览器渲染机制
+
+![](media/14693342774510.jpg)
+> photo by webkit team
+
+
+如果要讲渲染性能，上面这幅图几乎是所有实验和优化的参照模型。
+
+
+
+因为我们常用的是webkit(Blink)系浏览器，调试工具也是以chrome为基础，所以以下过程以chrome作为分析原型， IE 和 Firefox 的具体渲染过程会有一些细节差异。
+
+
+
+1. 编译(Parser)
+    HTML代码编译为DOM树。这一步其实对于我们实际优化渲染性能的指导意义仅在于 **不要创造过多毫无意义的DOM节点** 和 **标签闭合格式一定要准确**。 这些都是前端基础，这里不延伸讲。
+
+2. 布局(Layout)
+    
+    这个步骤包括三个步骤：
+    
+    1. 重新计算样式(Recalculate Style)
+     
+       一旦浏览器知道了某个元素对应的样式规则是什么，浏览器就会开始计算这个元素要占用多少的空间，他会出现在什么位置之类的各种信息
+       
+    2. 布局操作(Layout)
+
+       计算结束之后，浏览器就会开始根据计算结果将元素们
+       
+    3. 更新层级树(Update layer tree) 
+    
+    
+     Web 的布局渲染模型决定了一个元素能够影响另一个元素的渲染，比如 `<body>` 元素的宽度变化就会很大程度影响它所有子元素的宽度，导致全部重绘，所以说重绘是一种自上而下的树遍历操作，这种操作就会对浏览器性能有比较大的影响。
+
+3. 关于 paint
+
+    绘制这个操作其实就是一个填满像素的过程, 包括了将 文字，颜色，图片，边框和阴影等元素的可见部分全部都画出来的一个过程。 而这个绘制过程会像PS分层一样，分成层来绘制，然后叠加起来。
+可以打开chrome工具里面的纹理，这样就能知道每个层被分为几个纹理来绘制。
+
+    chrome里面的 paint 操作包括了：
+    
+    1. 组合层(composite layers)
+    浏览器会将页面的每一部分暗自绘制到各个对应的层，然后将这些层叠合起来，这样浏览器才能正确渲染出我们想要的图像。这一步叠合层的操作，就叫做 `compositing` 。
+    ![](media/14695219839859.jpg)           
+    2. 绘制(Paint Setup/Paint(size x size)) 
+
+
+
+
+#### 滑动性能
+
+
+滑动性能要单独提出来讲，因为我认为解决了初始加载性能和动画性能之后，滑动性能应该是一个稍微进阶的练习。
+
+在调试过程中注意到一个有趣的现象，有时打开了页面并不会导致crash，但快速滑动的时候却会。由于crash是页面本身内存占比过高，只要优化了页面的内存占用，滑动自然也不会是很大的问题。但依然有几个小细节点可以注意，
+
+我们在调试器中能清晰看到每种东西占用的单线程的执行时长，而这个时间可以理解为资源占用，即是CPU或者内存占用。
+
+滑动的过程是这样的： 浏览器会大概扫了一眼你的DOM树和附着的样式，然后它找出那些它认为在滚动之后依然长得一样的部分，之后将这些元素打了个包，拍个快照，合成一个层，然后将这个层栅格化为纹理，组合起来再渲染到屏幕上。
+
+无论你在什么时候滑动页面，页面滚动都是一个不断重新组合重新绘制的过程。 而我们要做的，就是减少这种图层纹理的重新绘制带来的影响，我们可以让它尽量少重绘更大面积的东西，面积越小，则我们的渲染效率就会越高。 所以减少渲染区域在滚动里就显得非常重要。
+
+滚动性能的调试相对于普通的渲染和动画性能的调试会稍微麻烦一些，但不代表没有办法，因为滚动本身就是一个不流畅的动画，我们只是希望检测出其中有无影响性能部分的东西。
+
+Preventing 'layout thrashing'
+
+
+background-size: cover; 可以改善
+
+在很多资料中都提到一种特别的优化，那就是一个屏幕大小的背景图在前景滚动时 `fixed`，使用 `background-attachment: fixed` 。
+
+唔，感觉可以好好聊聊 `Fixed` 的问题：
+
+首先我们设置一个大前提： 设计师无法被说动，坚持要这种耗费性能的效果。 那么一个 10 FPS的滚动动画是相当让人难受的，至少让我很难受。
+
+`background-attachment: fixed` 在用户滑动的时候不断触发 `paint` 操作。为什么？ 因为我们在滚动页面的时候，页面必须重新定位各个地方的内容，但背景却一直不动，这样为了最终呈现出来的效果（背景固定而前景滚动），必定会不断地绘制整个页面。因为这个效果实在太糟糕，所以IOS直接忽略了 `background-attachment: fixed` 这个属性。
+
+`Pointer-events: none ` , 好吧我承认这个是一个办法，但并非银弹。而 Chrome 最新推出的 `passive: true` 也可以缓解这个事件多次回调的问题。
+
+使用 div + pointer-events: none 大法:
+<iframe width="640" height="480" src="https://www.youtube.com/embed/MFY8UX3P-LQ" frameborder="0" allowfullscreen></iframe>
+
+
+问卷里面也多次使用了这种导致重复渲染的Fixed效果，比如顶部的进度条，背后的全局导航栏。
+
+
+怎么做?
+
+```CSS
+.what-we-do-cards {
+  @include clearfix;
+  border-top: 10px solid rgba(255, 255, 255, .46);
+  background-color: white;
+  background: url('/img/front/strategy.jpg') no-repeat center center;
+  background-attachment: fixed;
+  background-size: cover;
+  color: $white;
+  padding-bottom: 4em;
+}
+```
+
+```CSS
+.what-we-do-cards {
+  @include clearfix;
+  border-top: 10px solid rgba(255, 255, 255, .46);
+  color: $white;
+  padding-bottom: 4em;
+  overflow: hidden; // added for pseudo-element
+  position: relative; // added for pseudo-element
+
+  // Fixed-position background image
+  &::before {
+    content: ' ';
+    position: fixed; // instead of background-attachment
+    width: 100%;
+    height: 100%;
+    top: 0;
+    left: 0;
+    background-color: white;
+    background: url('/img/front/strategy.jpg') no-repeat center center;
+    background-size: cover;
+    will-change: transform; // creates a new paint layer
+    z-index: -1;
+  }
+}
+```
+
+
+上述代码最关键的一点就是 `will-change: transform` 应用到了伪元素上。 `will-change` 是一个 W3C 官方标准推荐的属性， 用于告诉浏览器这个元素应该单独渲染为一个图层，而不是和他周围的元素一起渲染。  这个属性等于让我们告诉浏览器 "浏览器大哥你好， 这个元素在未来某个时间会产生风云突变，请将它单独绘制为一个图层，这样不会影响到性能"。
+
+
+
+### 找出问题的步骤
+
+我们来看一下找出绘制和卡顿问题的步骤：
+
+
+打开你的页面，登录你的开发者工具然后转到Timeline面板。 点击记录按钮，然后开始正常使用你的页面，让程序记录下来这些操作。
+![](media/14695852136686.jpg)
+
+
+检查`Timeline`中每一帧的渲染预算是否低于我们预期的 60fps。 如果结果这个检查结果非常靠近临界线，那么在移动端很可能就会超越这条临界线。
+我们要保证所有的事情都在10ms内完成（本来是16ms），但要给移动设备留一点余地，当然如果你是远程调试，可以模拟到移动端的真实情况，那么每一件事情都保证在16ms内完成即可。
+
+找到卡顿的帧之后，找一下原因是什么？ CSS 布局问题？ 还是 JS 问题 ？  解决掉它。 
+
+如果这是一个CSS问题，就是 Paint或者 layout 问题：
+1. 隐藏页面上其他暂时不需要的元素，你会发现隐藏掉一些元素之后你的页面帧率问题被解决了，那么你需要好好关注一下这个元素的CSS样式，它拖慢了你的页面，比如用了`box-shadow` 这类耗费性能的元素。
+2. 然后针对该元素进行优化。
+3. 特别是页面严重依赖滚动动画的时候，你需要发现你主要的内容是否依赖于 `overflow:scroll` 这个属性。如果这个属性对应的内容没有被单独提升为一个layer绘制对于大长高度的滑动页面是一个巨大的挑战，因为你每滚动一次，就会完全被重绘一次。
+4. 可以用正常的页面滑动或者是 `position:fixed` 来解决这个问题。
+
+### 案例改良过程
+改良前的加载曲线：
+
+![](media/14694291111227.jpg)
+
+
+占用内存： 4.2m - 10.0m
+占用CPU： 50%脚本执行，25%渲染绘制，25%其他。
+FPS ： 跳帧几次
+
+多次测量表明载入脚本执行时间为 3300ms+-150ms ，渲染执行为 1700ms+-100ms ，绘制执行为 180ms+-50ms;
+
+
+
+而去除一系列必须无法动的逻辑之外，我们能优化的上限是：
+
+
+![](media/14694299002149.jpg)
+
+稳定在 1600ms+-100ms 渲染绘制总共保持在 50ms+-20ms  
+
+
+
+
+改良前的滚动曲线：
+
+![](media/14694287558674.jpg)
+
+
+几乎所有工作都集中在再次渲染上，滚动FPS超60次数非常多，明显有卡滞的感觉。
+
+
+
+进行CSS改良：
+1. 去除Fixed。
+2. 
+
+进行脚本改良：
+1. 阻止多次插入。
+2. Passive event listeners
+
+
+
+即使是利用数据线和 ADB 调试 Andorid 设备中的 Chrome，亦或者 MacOS 中调试 Safari 浏览器，均受系统和设备当时可用资源等外界变因影响，无法避免出现一些误差。所以需要多次测量取平均值才能判断我们某一改动是否优化了性能而非因为可变因素。
+
+使用工具来找到拖慢渲染性能的原因，以下这些是要特别注意的：
+
+`position:fixed`,`overflow:scroll`, hover 效果 和 touch 事件侦听。
+
+
+长时间的绘制导致的卡帧很可能来源于以下几个原因其中一个：
+
+1 . 可见元素使用了复杂昂贵的CSS属性
+2 . 图像的解码(base64) 和 图像的变形
+3 . 多余的图层
+4 . 大量数据处理
+
+### 执行性能
+
+无论是 **全局变量**，**一直执行忘记cancel掉的计时器**，或者是**脱离了DOM的引用**，**无意暴露的闭包** 都会或多或少影响到页面的性能，影响的方式通通都是在页面执行时占用一定量的内存不释放，导致页面其他部分可用资源变相减少。这部分并不打算深入讲，因为通常这种错误会被 eslint 等其他东西检查出来，即使是计时器，我相信每一个写JS的人在写计时器都会考虑关闭的问题，而我也没有什么高屋建瓴的结论，无非是小心小心再小心。
+
+
+## 总结
+
+GPU加速其实是一直存在的，而如同`translate3D`这种hack只是为了让这个元素生成独立的 `GraphicsLayer` ， 占用一部分内存，但同时也会在动画或者repaint的时候不会影响到其他任何元素，对高刷新频率的东西，就应该分离出单独的一个 `GraphicsLayer`。
+
+GPU对于动画图形的渲染处理比CPU要快。
+
+`RenderLayer` 树，满足以下任意一点的就会生成独立一个 `RenderLayer`。
+
+- 页面的根节点的RenderObject
+- 有明确的CSS定位属性（relative，absolute或者transform）
+- 是透明的
+- 有CSS overflow、CSS alpha遮罩（alpha mash）或者CSS reflection
+- 有CSS 滤镜（fliter）
+- 3D环境或者2D加速环境的canvas元素对应的RenderObject
+- video元素对应的RenderObject
+
+
+每个`RenderLayer` 有多个 `GraphicsLayer` 存在
+
+- 有3D或者perspective transform的CSS属性的层
+- 使用加速视频解码的video元素的层
+- 3D或者加速2D环境下的canvas元素的层
+- 插件，比如flash（Layer is used for a composited plugin）
+- 对opacity和transform应用了CSS动画的层
+- 使用了加速CSS滤镜（filters）的层
+- 有合成层后代的层
+- 同合成层重叠，且在该合成层上面（z-index）渲染的层
+
+每个`GraphicsLayer` 生成一个 `GraphicsContext`, 就是一个位图，传送给GPU，由GPU合成放出。
+
+那么就是说，`GraphicsLayer`过少则每次repaint大整体的工作量巨大，而过多则repaint小碎块的次数过多。这种次数过多就称为 层数爆炸 ，为了防止这个爆炸 Blink 引擎做了一个特殊处理。
+
+
+
+动画最好用这四种：
+    Transform - translate , transform - scale, transform - rotate,  Opacity;
+    
+在Chrome Canary和Safari中，你可以对filters设置动画，因为它们是用主进程来处理的所以它们会被加速完成，并且通常都会有良好的表现。但是目前filters不被Internet Explorer 或者 Firefox 支持，所以你需要谨慎地使用它。
+
+命令式动画vs说明式动画
+
+开发者常常需要决定它们的动画用JavaScript（命令式）来完成还是用CSS（说明式）来完成。它们各有优缺点，让我们一起来看看：
+
+命令式
+
+命令式动画主要的优点同时也是它主要的缺点的是：它在浏览器主进程的JavaScript中运行。主进程已经忙于运行其他的JavaScript，样式的计算，布局还有绘制。所以进程内存在这资源竞争。这实质上增加了掉帧的风险，可能这一帧是你认为最重要的帧。
+
+JavaScript中的动画可以为你提供更多的控制：开始，暂停，回放，中断和取消等细节。有一些特效如parallax 的滚动只能用JavaScript来完成。
+
+声明式
+
+作为替代的方案，你可以用CSS来实现你的渐变和动画。最主要的好处就是，浏览器会对动画进行优化。如果有需要，它会创建图层。并且可以在主进程之外完成一些操作。它最主要的缺点就是CSS动画相对于Javascript动画而言，缺乏表现力。并且很难有意义地组织动画，这意味着创造动画会带来较高的复杂度和错误率。
+
+
+
+
+
+>
+https://aerotwist.com/blog/flip-your-animations/
+https://developers.google.com/web/fundamentals/performance/rendering/
+https://csstriggers.com/
+http://www.barretlee.com/blog/2016/05/30/h5-crash-research/
+http://gent.ilcore.com/2011/03/how-not-to-trigger-layout-in-webkit.html
+http://www.html5rocks.com/zh/tutorials/speed/layers/
+http://www.html5rocks.com/en/tutorials/speed/scrolling/
+http://velocity.oreilly.com.cn/2013/ppts/16_ms_optimization--web_front-end_performance_optimization.pdf
+http://jankfree.org/
+http://fourkitchens.com/blog/article/fix-scrolling-performance-css-will-change-property
+https://www.chromium.org/developers/how-tos/trace-event-profiling-tool/anatomy-of-jank
+https://www.thecssninja.com/css/follow-up-60fps-scroll
+http://www.chromium.org/developers/design-documents/gpu-accelerated-compositing-in-chrome
+https://developers.google.com/web/updates/2016/06/css-containment
+
+
+
+
