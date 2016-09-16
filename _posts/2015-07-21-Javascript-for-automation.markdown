@@ -5,10 +5,10 @@ date:   2015-07-21
 comments: true
 ---
 
-#说明
+<p class="intro">
 在 OS X Yosemite 之后的OS系统中我们可以使用 Javascript 来完成自动完成一些系统的工作，这篇文章是有关这方面的知识阐述。
+</p>
 
-#内容
 
 +  [简介](#intro)
 +  [访问应用程序](#applicationVisit)
@@ -32,6 +32,7 @@ comments: true
 
 [id]: intro
 ##简介
+
 Javascript 在 Mac 环境下执行可以引用以下这些全局变量来完成一些系统级别的任务：
 `Automation`  `Application`  `Library`  `Path`  `Progress`  `ObjectSpecifier`  `delay` `console.log`  `ObjC`  `Ref`  `$`
 
@@ -45,11 +46,13 @@ Javascript 在 Mac 环境下执行可以引用以下这些全局变量来完成�
 脚本字典会详细列举每个应用中可被操作调用的类，对象和方法，包括了 AppleScript , Javascript，Objective-C (通过脚本桥接框架实现) 等好几种语言格式，这些可操作的对象都会按规范生成对应的 Javascript 变量列表供开发者操作。
 
 ###对象修饰符
+
 在以上提到的这些引用了OSA的环境中，当你获取了一个 `Appication` 对象的 JavaScript 属性时，无论这个属性对象指向的是其他 App，还是其他 App 窗口，或者是外部数据，这个对象都只是一个对象修饰符而不是一个真正意义的实体对象。`Application` 对象上的 Javascript 属性对象都只是对象指针，并不是对应实体的真实值，而只是一个指向而已。如果要从被引用的属性上更新对应的值，必须做一些额外的步骤，这些步骤会在 "获取属性和设置属性" 这一节中提到.
 
 
 [id]:applicationVisit
 ##访问应用程序
+
 应用程序可以被下面这几种方式调用访问到：
 
 1. 通过名称
