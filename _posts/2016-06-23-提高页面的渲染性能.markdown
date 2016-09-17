@@ -70,7 +70,7 @@ TL;DR
 
 以下为 `margin` 变化时页面的执行数据：
 
-![](../../assets/articleImage/2016-06-23/14700408894152.jpg)
+![](/assets/articleImage/2016-06-23/14700408894152.jpg)
 
 
 我们可以看到页面在每一次动画执行的时候经历了 - 
@@ -83,7 +83,7 @@ TL;DR
 
 以下是一个 `color` 改变的动画：
 
-![](../../assets/articleImage/2016-06-23/14700395692709.jpg)
+![](/assets/articleImage/2016-06-23/14700395692709.jpg)
 
 可以看到这个流程相对于上述比较简单了一些，没有调用 `layout`
 
@@ -94,7 +94,7 @@ TL;DR
 
 
 以下为 `transform` 变化时页面的执行数据：
-![](../../assets/articleImage/2016-06-23/14700319383770.jpg)
+![](/assets/articleImage/2016-06-23/14700319383770.jpg)
 
 
 我们可以看到主线程的工作已经交给 GPU 来优化，而主线程几乎不占工作。
@@ -145,9 +145,9 @@ $(targetEl).append(tempEl);
 ##### 检查repaint层是否合理
 
 
-![](../../assets/articleImage/2016-06-23/14693400037481.jpg)
+![](/assets/articleImage/2016-06-23/14693400037481.jpg)
 
-![](../../assets/articleImage/2016-06-23/14693401941493.jpg)
+![](/assets/articleImage/2016-06-23/14693401941493.jpg)
 >
 Javascript : 通常意义上来说Javascript用于可见的更改，无论是 jQuery 的 animation 函数， 排列一个数组集合，或者是在页面上增加一个DOM。 尽管可见的变化不一定是由 Javascript 触发，比如 CSS Animation, Transition 和 web animation API 都被广泛应用于页面变化。
 样式计算 : 这个过程会基于选择器来计算CSS规则应该应用在哪些元素上，比如 `.headline` 或者 `.nav > .nav__item`. 一旦一个规则被声明之后，就会马上被应用每个对应的元素，然后开始进行计算。 
@@ -234,13 +234,13 @@ ele.classname = "normalClassName abc";
 
 ##### 浏览器渲染机制
 
-![](../../assets/articleImage/2016-06-23/14693342774510.jpg)
+![](/assets/articleImage/2016-06-23/14693342774510.jpg)
 > photo by webkit team
 
 
 如果要讲渲染性能，上面这幅图几乎是所有实验和优化的参照模型。
 
-![14695857351291](../../assets/articleImage/14695857351291.jpg)
+![](/assets/articleImage/2016-06-23/14695857351291.jpg)
 
 
 因为我们常用的是webkit(Blink)系浏览器，调试工具也是以chrome为基础，所以以下过程以chrome作为分析原型， IE 和 Firefox 的具体渲染过程会有一些细节差异。
@@ -276,7 +276,7 @@ ele.classname = "normalClassName abc";
     
     1. 组合层(composite layers)
     浏览器会将页面的每一部分暗自绘制到各个对应的层，然后将这些层叠合起来，这样浏览器才能正确渲染出我们想要的图像。这一步叠合层的操作，就叫做 `compositing` 。
-    ![](../../assets/articleImage/2016-06-23/14695219839859.jpg)           
+    ![](/assets/articleImage/2016-06-23/14695219839859.jpg)           
     2. 绘制(Paint Setup/Paint(size x size)) 
 
 
@@ -371,7 +371,7 @@ background-size: cover; 可以改善
 
 
 打开你的页面，登录你的开发者工具然后转到Timeline面板。 点击记录按钮，然后开始正常使用你的页面，让程序记录下来这些操作。
-![](../../assets/articleImage/2016-06-23/14695852136686.jpg)
+![](/assets/articleImage/2016-06-23/14695852136686.jpg)
 
 
 检查`Timeline`中每一帧的渲染预算是否低于我们预期的 60fps。 如果结果这个检查结果非常靠近临界线，那么在移动端很可能就会超越这条临界线。
@@ -388,7 +388,7 @@ background-size: cover; 可以改善
 ### 案例改良过程
 改良前的加载曲线：
 
-![](../../assets/articleImage/2016-06-23/14694291111227.jpg)
+![](/assets/articleImage/2016-06-23/14694291111227.jpg)
 
 
 占用内存： 4.2m - 10.0m
@@ -402,7 +402,7 @@ FPS ： 跳帧几次
 而去除一系列必须无法动的逻辑之外，我们能优化的上限是：
 
 
-![](../../assets/articleImage/2016-06-23/14694299002149.jpg)
+![](/assets/articleImage/2016-06-23/14694299002149.jpg)
 
 稳定在 1600ms+-100ms 渲染绘制总共保持在 50ms+-20ms  
 
@@ -411,7 +411,7 @@ FPS ： 跳帧几次
 
 改良前的滚动曲线：
 
-![](../../assets/articleImage/2016-06-23/14694287558674.jpg)
+![](/assets/articleImage/2016-06-23/14694287558674.jpg)
 
 
 几乎所有工作都集中在再次渲染上，滚动FPS超60次数非常多，明显有卡滞的感觉。
@@ -505,20 +505,20 @@ JavaScript中的动画可以为你提供更多的控制：开始，暂停，回�
 
 
 >
-https://aerotwist.com/blog/flip-your-animations/
-https://developers.google.com/web/fundamentals/performance/rendering/
-https://csstriggers.com/
-http://www.barretlee.com/blog/2016/05/30/h5-crash-research/
-http://gent.ilcore.com/2011/03/how-not-to-trigger-layout-in-webkit.html
-http://www.html5rocks.com/zh/tutorials/speed/layers/
-http://www.html5rocks.com/en/tutorials/speed/scrolling/
-http://velocity.oreilly.com.cn/2013/ppts/16_ms_optimization--web_front-end_performance_optimization.pdf
-http://jankfree.org/
-http://fourkitchens.com/blog/article/fix-scrolling-performance-css-will-change-property
-https://www.chromium.org/developers/how-tos/trace-event-profiling-tool/anatomy-of-jank
-https://www.thecssninja.com/css/follow-up-60fps-scroll
-http://www.chromium.org/developers/design-documents/gpu-accelerated-compositing-in-chrome
-https://developers.google.com/web/updates/2016/06/css-containment
+[https://aerotwist.com/blog/flip-your-animations/](https://aerotwist.com/blog/flip-your-animations/)
+[https://developers.google.com/web/fundamentals/performance/rendering/](https://developers.google.com/web/fundamentals/performance/rendering/)
+[https://csstriggers.com/](https://csstriggers.com/)
+[http://www.barretlee.com/blog/20/30/h5-crash-research/](http://www.barretlee.com/blog/20/30/h5-crash-research/)
+[http://gent.ilcore.com/20/how-not-to-trigger-layout-in-webkit.html](http://gent.ilcore.com/20/how-not-to-trigger-layout-in-webkit.html)
+[http://www.html5rocks.c/tutorials/speed/layers/](http://www.html5rocks.c/tutorials/speed/layers/)
+[http://www.html5rocks.c/tutorials/speed/scrolling/](http://www.html5rocks.c/tutorials/speed/scrolling/)
+[http://velocity.oreilly.com.cn/2013/ppts/16_ms_optimization--web_front-end_performance_optimization.pdf](http://velocity.oreilly.com.cn/2013/ppts/16_ms_optimization--web_front-end_performance_optimization.pdf)
+[http://jankfree.org/](http://jankfree.org/)
+[http://fourkitchens.com/blog/article/fix-scrolling-performance-css-will-change-property](http://fourkitchens.com/blog/article/fix-scrolling-performance-css-will-change-property)
+[https://www.chromium.org/developers/how-tos/trace-event-profiling-tool/anatomy-of-jank](https://www.chromium.org/developers/how-tos/trace-event-profiling-tool/anatomy-of-jank)
+[https://www.thecssninja.com/css/follow-up-60fps-scroll](https://www.thecssninja.com/css/follow-up-60fps-scroll)
+[http://www.chromium.org/developers/design-documents/gpu-accelerated-compositing-in-chrome](http://www.chromium.org/developers/design-documents/gpu-accelerated-compositing-in-chrome)
+[https://developers.google.com/web/updates/20/css-containment](https://developers.google.com/web/updates/20/css-containment)
 
 
 
