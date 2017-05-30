@@ -15,7 +15,7 @@ TL;DR
 <iframe src="https://player.vimeo.com/video/183071282" width="640" height="1138" frameborder="0" webkitallowfullscreen mozallowfullscreen allowfullscreen></iframe>
 
 
-作为一名熟练的调试工程师，出了问题肯定马上开始调试，用起了达尔文的控制变量法找问题的出处。由于这是一个问卷，我第一反应就是某种题型导致了内存溢出，虽然在前端里内存溢出是比较少见的（V8自动回收内存）。
+作为一名熟练的调试工程师，出了问题肯定马上开始调试，用起了控制变量法找问题的出处。由于这是一个问卷，我第一反应就是某种题型导致了内存溢出，虽然在前端里内存溢出是比较少见的（V8自动回收内存）。
 
 在[http://wj.qq.com](http://wj.qq.com)里加入了不同类型的上百道题目后发现找不出问题起源，并没有引发到原本必现的crash。
 
